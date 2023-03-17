@@ -157,6 +157,8 @@ router.post("/lugares", function (req, res) {
 router.post("/favoris", userMiddleware.isLoggedIn, (req, res, next) => {
   const IdUsuario = req.user.IdUsuario;
   const IdLugar = req.body.IdLugar;
+  console.log("id usuario: " + IdUsuario);
+  console.log("IdLugar: " + IdLugar);
 
   const sql = "INSERT INTO favoritos (IdUsuario, IdLugar) VALUES (?, ?)";
 

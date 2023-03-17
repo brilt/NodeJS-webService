@@ -87,8 +87,7 @@ router.post("/login", (req, res, next) => {
             });
           }
 
-            if (bResult) {
-              
+          if (bResult) {
             const token = jwt.sign(
               {
                 email: result[0].email,
@@ -108,8 +107,8 @@ router.post("/login", (req, res, next) => {
               token,
               user: result[0],
             });
-            }
-            
+          }
+
           return res.status(401).send({
             msg: "email or password is incorrect!",
           });
@@ -140,16 +139,39 @@ router.post("/lugares", function (req, res) {
   const Latitud = req.body.Latitud;
   const Imagen = req.body.Imagen;
 
-  const sql = "INSERT INTO lugares (Nombre, Descripción,Ciudad,Región,Enlace,Longitud,Latitud,Imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+  const sql =
+    "INSERT INTO lugares (Nombre, Descripción,Ciudad,Región,Enlace,Longitud,Latitud,Imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-  db.query(sql, [Nombre, Descripción, Ciudad, Región, Enlace, Longitud, Latitud, Imagen], function (err, result) {
-    if (err) throw err;
-    console.log(result);
+  db.query(
+    sql,
+    [Nombre, Descripción, Ciudad, Región, Enlace, Longitud, Latitud, Imagen],
+    function (err, result) {
+      if (err) throw err;
+      console.log(result);
 
-    res.json(result);
-  });
+      res.json(result);
+    }
+  );
 });
 
+router.post("/favoris", userMiddleware.isLoggedIn, (req, res, next) => {
+  const IdUsuario = req.user.IdUsuario;
+  const IdLugar = req.body.IdLugar;
 
+  const sql = "INSERT INTO favoritos (IdUsuario, IdLugar) VALUES (?, ?)";
+
+  db.query(sql, [IdUsuario, IdLugar], (err, result) => {
+    if (err) {
+      return res.status(400).send({
+        msg: err,
+      });
+    }
+
+    return res.status(200).send({
+      msg: "Lieu ajouté en favori avec succès!",
+      favoriId: result.insertId,
+    });
+  });
+});
 
 module.exports = router;

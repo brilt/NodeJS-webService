@@ -155,23 +155,72 @@ router.post("/lugares", function (req, res) {
 });
 
 router.post("/favoris", userMiddleware.isLoggedIn, (req, res, next) => {
-  const IdUsuario = req.user.IdUsuario;
+  const IdUsuario = req.body.IdUsuario;
   const IdLugar = req.body.IdLugar;
-  console.log("id usuario: " + IdUsuario);
-  console.log("IdLugar: " + IdLugar);
+  const Id = uuid.v4(); // Ajout de l'id unique
+  const sqlSelect =
+    "SELECT * FROM favoritos WHERE IdUsuario = ? AND IdLugar = ?";
+  const sqlInsert =
+    "INSERT INTO favoritos (Id, IdUsuario, IdLugar) VALUES (?, ?, ?)";
+  const sqlDelete = "DELETE FROM favoritos WHERE IdUsuario = ? AND IdLugar = ?";
 
-  const sql = "INSERT INTO favoritos (IdUsuario, IdLugar) VALUES (?, ?)";
+  db.query(sqlSelect, [IdUsuario, IdLugar], (err, result) => {
+    if (err) {
+      return res.status(400).send({
+        msg: err,
+        isFav: false,
+      });
+    }
 
-  db.query(sql, [IdUsuario, IdLugar], (err, result) => {
+    if (result.length > 0) {
+      // Le lien existe déjà, on le supprime
+      db.query(sqlDelete, [IdUsuario, IdLugar], (err, result) => {
+        if (err) {
+          return res.status(400).send({
+            msg: err,
+            isFav: false,
+          });
+        }
+
+        return res.status(200).send({
+          msg: "Lieu retiré des favoris avec succès!",
+          isFav: false,
+        });
+      });
+    } else {
+      // Le lien n'existe pas, on l'ajoute
+      db.query(sqlInsert, [Id, IdUsuario, IdLugar], (err, result) => {
+        if (err) {
+          return res.status(400).send({
+            msg: err,
+            isFav: false,
+          });
+        }
+
+        return res.status(200).send({
+          msg: "Lieu ajouté en favori avec succès!",
+          isFav: true,
+        });
+      });
+    }
+  });
+});
+router.post("/checkFavoritos", userMiddleware.isLoggedIn, (req, res, next) => {
+  const IdUsuario = req.body.IdUsuario;
+  const IdLugar = req.body.IdLugar;
+
+  const sqlSelect =
+    "SELECT * FROM favoritos WHERE IdUsuario = ? AND IdLugar = ?";
+
+  db.query(sqlSelect, [IdUsuario, IdLugar], (err, result) => {
     if (err) {
       return res.status(400).send({
         msg: err,
       });
     }
-
+    const favorito = result.length > 0;
     return res.status(200).send({
-      msg: "Lieu ajouté en favori avec succès!",
-      favoriId: result.insertId,
+      favorito,
     });
   });
 });

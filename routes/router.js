@@ -10,10 +10,6 @@ const jwt = require("jsonwebtoken");
 const db = require("../lib/db.js");
 const userMiddleware = require("../middleware/users.js");
 
-router.get("/secret-route", userMiddleware.isLoggedIn, (req, res, next) => {
-  res.send("This is the secret content. Only logged in users can see that!");
-});
-
 router.post("/sign-up", userMiddleware.validateRegister, (req, res, next) => {
   db.query(
     `SELECT * FROM testLog WHERE LOWER(email) = LOWER(${db.escape(
@@ -224,5 +220,16 @@ router.post("/checkFavoritos", userMiddleware.isLoggedIn, (req, res, next) => {
     });
   });
 });
+
+router.get("/orderFav", function (req, res) {
+  const sql = 'SELECT IdLugar, COUNT(*) as count FROM favoritos GROUP BY IdLugar ORDER BY count DESC';
+
+  db.query(sql, (err, result) => {
+    if (err) throw err;
+    console.log(result);
+
+    res.json(result);
+  });
+})
 
 module.exports = router;

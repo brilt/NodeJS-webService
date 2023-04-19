@@ -114,53 +114,56 @@ router.post("/login", (req, res, next) => {
   );
 });
 
-router.get("/lugares", function (req, res) {
-  const sql3 = "SELECT * FROM lugares";
+router.get("/places", function (req, res) {
+  const sql3 = "SELECT * FROM places";
 
   db.query(sql3, (err, result) => {
+    if (err) {
+    console.log("ERROR LIGNE 122"+result);
+      
+    }
     if (err) throw err;
-    console.log(result);
 
     res.json(result);
   });
 });
 
-router.post("/lugares", function (req, res) {
-  const Nombre = req.body.Nombre;
-  const Descripción = req.body.Descripción;
-  const Ciudad = req.body.Ciudad;
-  const Región = req.body.Región;
-  const Enlace = req.body.Enlace;
+router.post("/places", function (req, res) {
+  const Name = req.body.Name;
+  const Description = req.body.Description;
+  const City = req.body.City;
+  const Region = req.body.Region;
+  const Link = req.body.Link;
   const Longitud = req.body.Longitud;
-  const Latitud = req.body.Latitud;
-  const Imagen = req.body.Imagen;
+  const Latitude = req.body.Latitude;
+  const Image = req.body.Image;
 
   const sql =
-    "INSERT INTO lugares (Nombre, Descripción,Ciudad,Región,Enlace,Longitud,Latitud,Imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO places (Name, Description,City,Region,Link,Longitud,Latitude,Image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
   db.query(
     sql,
-    [Nombre, Descripción, Ciudad, Región, Enlace, Longitud, Latitud, Imagen],
+    [Name, Description, City, Region, Link, Longitud, Latitude, Image],
     function (err, result) {
       if (err) throw err;
-      console.log(result);
+      console.log("ERROR LINE 146"+result);
 
       res.json(result);
     }
   );
 });
 
-router.post("/favoris", userMiddleware.isLoggedIn, (req, res, next) => {
-  const IdUsuario = req.body.IdUsuario;
-  const IdLugar = req.body.IdLugar;
+router.post("/favorites", userMiddleware.isLoggedIn, (req, res, next) => {
+  const userId = req.body.userId;
+  const placeId = req.body.PlaceId;
   const Id = uuid.v4(); // Ajout de l'id unique
   const sqlSelect =
-    "SELECT * FROM favoritos WHERE IdUsuario = ? AND IdLugar = ?";
+    "SELECT * FROM favorites WHERE userId = ? AND placeId = ?";
   const sqlInsert =
-    "INSERT INTO favoritos (Id, IdUsuario, IdLugar) VALUES (?, ?, ?)";
-  const sqlDelete = "DELETE FROM favoritos WHERE IdUsuario = ? AND IdLugar = ?";
+    "INSERT INTO favorites (Id, userId, placeId) VALUES (?, ?, ?)";
+  const sqlDelete = "DELETE FROM favorites WHERE userId = ? AND placeId = ?";
 
-  db.query(sqlSelect, [IdUsuario, IdLugar], (err, result) => {
+  db.query(sqlSelect, [userId, placeId], (err, result) => {
     if (err) {
       return res.status(400).send({
         msg: err,
@@ -170,7 +173,7 @@ router.post("/favoris", userMiddleware.isLoggedIn, (req, res, next) => {
 
     if (result.length > 0) {
       // Le lien existe déjà, on le supprime
-      db.query(sqlDelete, [IdUsuario, IdLugar], (err, result) => {
+      db.query(sqlDelete, [userId, placeId], (err, result) => {
         if (err) {
           return res.status(400).send({
             msg: err,
@@ -179,13 +182,13 @@ router.post("/favoris", userMiddleware.isLoggedIn, (req, res, next) => {
         }
 
         return res.status(200).send({
-          msg: "Lieu retiré des favoris avec succès!",
+          msg: "Place has been successfuly deleted from favorites!",
           isFav: false,
         });
       });
     } else {
       // Le lien n'existe pas, on l'ajoute
-      db.query(sqlInsert, [Id, IdUsuario, IdLugar], (err, result) => {
+      db.query(sqlInsert, [Id, userId, placeId], (err, result) => {
         if (err) {
           return res.status(400).send({
             msg: err,
@@ -194,39 +197,39 @@ router.post("/favoris", userMiddleware.isLoggedIn, (req, res, next) => {
         }
 
         return res.status(200).send({
-          msg: "Lieu ajouté en favori avec succès!",
+          msg: "Place successfuly added to favorites!",
           isFav: true,
         });
       });
     }
   });
 });
-router.post("/checkFavoritos", userMiddleware.isLoggedIn, (req, res, next) => {
-  const IdUsuario = req.body.IdUsuario;
-  const IdLugar = req.body.IdLugar;
+router.post("/checkFavorites", userMiddleware.isLoggedIn, (req, res, next) => {
+  const userId = req.body.userId;
+  const placeId = req.body.placeId;
 
   const sqlSelect =
-    "SELECT * FROM favoritos WHERE IdUsuario = ? AND IdLugar = ?";
+    "SELECT * FROM favorites WHERE userId = ? AND placeId = ?";
 
-  db.query(sqlSelect, [IdUsuario, IdLugar], (err, result) => {
+  db.query(sqlSelect, [userId, placeId], (err, result) => {
     if (err) {
       return res.status(400).send({
         msg: err,
       });
     }
-    const favorito = result.length > 0;
+    const favorite = result.length > 0;
     return res.status(200).send({
-      favorito,
+      favorite,
     });
   });
 });
 
 router.get("/orderFav", function (req, res) {
-  const sql = 'SELECT IdLugar, COUNT(*) as count FROM favoritos GROUP BY IdLugar ORDER BY count DESC';
+  const sql = 'SELECT placeId, COUNT(*) as count FROM favorites GROUP BY placeId ORDER BY count DESC';
 
   db.query(sql, (err, result) => {
     if (err) throw err;
-    console.log(result);
+    console.log("ERROR LINE 229"+result);
 
     res.json(result);
   });

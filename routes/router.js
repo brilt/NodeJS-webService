@@ -155,7 +155,7 @@ router.post("/places", function (req, res) {
 
 router.post("/favorites", userMiddleware.isLoggedIn, (req, res, next) => {
   const userId = req.body.userId;
-  const placeId = req.body.PlaceId;
+  const placeId = req.body.placeId;
   const Id = uuid.v4(); // Ajout de l'id unique
   const sqlSelect =
     "SELECT * FROM favorites WHERE userId = ? AND placeId = ?";

@@ -235,4 +235,10 @@ router.get("/orderFav", function (req, res) {
   });
 })
 
+router.get('/mail', (req, res) => {
+  res.json({
+      message: 'Vue Mailer Application ?? '
+  });
+});
+
 module.exports = router;

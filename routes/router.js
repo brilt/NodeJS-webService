@@ -119,8 +119,7 @@ router.get("/places", function (req, res) {
 
   db.query(sql3, (err, result) => {
     if (err) {
-    console.log("ERROR LIGNE 122"+result);
-      
+      console.log("ERROR LIGNE 122" + result);
     }
     if (err) throw err;
 
@@ -146,7 +145,7 @@ router.post("/places", function (req, res) {
     [Name, Description, City, Region, Link, Longitud, Latitude, Image],
     function (err, result) {
       if (err) throw err;
-      console.log("ERROR LINE 146"+result);
+      console.log("ERROR LINE 146" + result);
 
       res.json(result);
     }
@@ -157,8 +156,7 @@ router.post("/favorites", userMiddleware.isLoggedIn, (req, res, next) => {
   const userId = req.body.userId;
   const placeId = req.body.placeId;
   const Id = uuid.v4(); // Ajout de l'id unique
-  const sqlSelect =
-    "SELECT * FROM favorites WHERE userId = ? AND placeId = ?";
+  const sqlSelect = "SELECT * FROM favorites WHERE userId = ? AND placeId = ?";
   const sqlInsert =
     "INSERT INTO favorites (Id, userId, placeId) VALUES (?, ?, ?)";
   const sqlDelete = "DELETE FROM favorites WHERE userId = ? AND placeId = ?";
@@ -208,8 +206,7 @@ router.post("/checkFavorites", userMiddleware.isLoggedIn, (req, res, next) => {
   const userId = req.body.userId;
   const placeId = req.body.placeId;
 
-  const sqlSelect =
-    "SELECT * FROM favorites WHERE userId = ? AND placeId = ?";
+  const sqlSelect = "SELECT * FROM favorites WHERE userId = ? AND placeId = ?";
 
   db.query(sqlSelect, [userId, placeId], (err, result) => {
     if (err) {
@@ -225,19 +222,43 @@ router.post("/checkFavorites", userMiddleware.isLoggedIn, (req, res, next) => {
 });
 
 router.get("/orderFav", function (req, res) {
-  const sql = 'SELECT placeId, COUNT(*) as count FROM favorites GROUP BY placeId ORDER BY count DESC';
+  const sql =
+    "SELECT placeId, COUNT(*) as count FROM favorites GROUP BY placeId ORDER BY count DESC";
 
   db.query(sql, (err, result) => {
     if (err) throw err;
-    console.log("ERROR LINE 229"+result);
+   
 
     res.json(result);
   });
-})
+});
 
-router.get('/mail', (req, res) => {
-  res.json({
-      message: 'Vue Mailer Application ?? '
+router.get("/mail", (req, res) => {
+  var nodemailer = require("nodemailer");
+  require('dotenv').config();
+
+
+  var transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.GMAIL_EMAIL,
+      pass: process.env.GMAIL_PASSWORD,
+    },
+  });
+
+  var mailOptions = {
+    from: "killianboisseau85@gmail.com",
+    to: "killianmexico@gmail.com",
+    subject: "Sending Email using Node.js",
+    text: "That was easy!",
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
   });
 });
 

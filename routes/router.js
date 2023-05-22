@@ -12,7 +12,7 @@ const userMiddleware = require("../middleware/users.js");
 
 router.post("/sign-up", userMiddleware.validateRegister, (req, res, next) => {
   db.query(
-    `SELECT * FROM testLog WHERE LOWER(email) = LOWER(${db.escape(
+    `SELECT * FROM user WHERE LOWER(email) = LOWER(${db.escape(
       req.body.email
     )});`,
     (err, result) => {
@@ -30,7 +30,7 @@ router.post("/sign-up", userMiddleware.validateRegister, (req, res, next) => {
           } else {
             // has hashed pw => add to database
             db.query(
-              `INSERT INTO testLog (id, email, password, registered) VALUES ('${uuid.v4()}', ${db.escape(
+              `INSERT INTO user (id, email, password, registered) VALUES ('${uuid.v4()}', ${db.escape(
                 req.body.email
               )}, ${db.escape(hash)}, now())`,
               (err, result) => {
@@ -54,7 +54,7 @@ router.post("/sign-up", userMiddleware.validateRegister, (req, res, next) => {
 
 router.post("/login", (req, res, next) => {
   db.query(
-    `SELECT * FROM testLog WHERE email = ${db.escape(req.body.email)};`,
+    `SELECT * FROM user WHERE email = ${db.escape(req.body.email)};`,
     (err, result) => {
       // user does not exists
       if (err) {
@@ -91,12 +91,12 @@ router.post("/login", (req, res, next) => {
               },
               "vivelatrinquette",
               {
-                expiresIn: "7d",
+                expiresIn: "1d",
               }
             );
 
             db.query(
-              `UPDATE testLog SET last_login = now() WHERE id = '${result[0].id}'`
+              `UPDATE user SET last_login = now() WHERE id = '${result[0].id}'`
             );
             return res.status(200).send({
               msg: "Logged in!",
